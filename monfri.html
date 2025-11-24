@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monday to Friday Timetable - Allied School</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="navbar">
+                <div class="logo">
+                    <i class="fas fa-school"></i>
+                    <span>Allied School</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                    <a href="admin.html"><i class="fas fa-user-cog"></i> Admin</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="timetable-container">
+            <div class="timetable-header">
+                <h1 class="timetable-title">Monday to Friday Timetable</h1>
+                <a href="index.html" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </div>
+            
+            <table class="timetable">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Teacher</th>
+                    </tr>
+                </thead>
+                <tbody id="timetable-body">
+                    <!-- Timetable data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Allied School Timetable System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Load Monday-Friday timetable data
+        document.addEventListener('DOMContentLoaded', function() {
+            const monfriData = JSON.parse(localStorage.getItem('monfriData')) || [];
+            const timetableBody = document.getElementById('timetable-body');
+            
+            if (monfriData.length === 0) {
+                timetableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No timetable data available</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            monfriData.forEach(item => {
+                html += `
+                    <tr>
+                        <td class="time-cell">${item.startTime} - ${item.endTime}</td>
+                        <td>${item.class}</td>
+                        <td class="subject-cell">${item.subject}</td>
+                        <td class="teacher-cell">${item.teacher || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            timetableBody.innerHTML = html;
+        });
+    </script>
+</body>
+</html>
