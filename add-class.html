@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Class - Allied School</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .form-container {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-top: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+        
+        .success-message {
+            background: var(--success);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="navbar">
+                <div class="logo">
+                    <i class="fas fa-school"></i>
+                    <span>Allied School</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="form-container">
+            <div class="timetable-header">
+                <h1 class="timetable-title">Add New Class</h1>
+                <a href="dashboard.html" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            </div>
+            
+            <div id="success-message" class="success-message">
+                <i class="fas fa-check-circle"></i> Class added successfully!
+            </div>
+            
+            <form id="add-class-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="class-name">Class Name *</label>
+                        <input type="text" id="class-name" class="form-control" placeholder="e.g., Class 1, Class 2" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Subject *</label>
+                        <input type="text" id="subject" class="form-control" placeholder="e.g., Mathematics, Science" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="start-time">Start Time *</label>
+                        <input type="time" id="start-time" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end-time">End Time *</label>
+                        <input type="time" id="end-time" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="teacher">Teacher Name</label>
+                        <input type="text" id="teacher" class="form-control" placeholder="e.g., Mr. Ahmed, Ms. Sara">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="schedule-type">Schedule Type *</label>
+                        <select id="schedule-type" class="form-control" required>
+                            <option value="">Select Schedule</option>
+                            <option value="monfri">Monday to Friday</option>
+                            <option value="saturday">Saturday</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="day">Day (Optional)</label>
+                        <select id="day" class="form-control">
+                            <option value="">All Days</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="reset" class="btn btn-outline">Reset Form</button>
+                    <button type="submit" class="btn">Add Class</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Recent Classes Section -->
+        <div class="timetable-container">
+            <h2>Recently Added Classes</h2>
+            <div id="recent-classes">
+                <!-- Recent classes will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Allied School Timetable System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecentClasses();
+            
+            // Form submission
+            document.getElementById('add-class-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addNewClass();
+            });
+        });
+        
+        function addNewClass() {
+            const className = document.getElementById('class-name').value;
+            const subject = document.getElementById('subject').value;
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+            const teacher = document.getElementById('teacher').value;
+            const scheduleType = document.getElementById('schedule-type').value;
+            const day = document.getElementById('day').value;
+            
+            // Get the appropriate data array based on schedule type
+            let dataKey = scheduleType === 'saturday' ? 'saturdayData' : 'monfriData';
+            let classData = JSON.parse(localStorage.getItem(dataKey)) || [];
+            
+            // Generate new ID
+            const newId = classData.length > 0 ? Math.max(...classData.map(item => item.id)) + 1 : 1;
+            
+            // Create new class object
+            const newClass = {
+                id: newId,
+                class: className,
+                subject: subject,
+                teacher: teacher,
+                startTime: startTime,
+                endTime: endTime,
+                day: day || null
+            };
+            
+            // Add to data array
+            classData.push(newClass);
+            
+            // Save back to localStorage
+            localStorage.setItem(dataKey, JSON.stringify(classData));
+            
+            // Show success message
+            const successMessage = document.getElementById('success-message');
+            successMessage.style.display = 'block';
+            
+            // Reset form
+            document.getElementById('add-class-form').reset();
+            
+            // Reload recent classes
+            loadRecentClasses();
+            
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        function loadRecentClasses() {
+            const recentClassesDiv = document.getElementById('recent-classes');
+            const monfriData = JSON.parse(localStorage.getItem('monfriData')) || [];
+            const saturdayData = JSON.parse(localStorage.getItem('saturdayData')) || [];
+            
+            // Combine and get latest 5 classes
+            const allClasses = [...monfriData, ...saturdayData]
+                .sort((a, b) => b.id - a.id)
+                .slice(0, 5);
+            
+            if (allClasses.length === 0) {
+                recentClassesDiv.innerHTML = '<p>No classes added yet.</p>';
+                return;
+            }
+            
+            let html = '<div class="card-container">';
+            allClasses.forEach(classItem => {
+                html += `
+                    <div class="card">
+                        <h3>${classItem.class}</h3>
+                        <p><strong>Subject:</strong> ${classItem.subject}</p>
+                        <p><strong>Time:</strong> ${classItem.startTime} - ${classItem.endTime}</p>
+                        <p><strong>Teacher:</strong> ${classItem.teacher || 'Not assigned'}</p>
+                        <small>ID: ${classItem.id}</small>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            recentClassesDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
