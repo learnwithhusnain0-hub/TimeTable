@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Timings - Allied School</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .timing-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .timing-section {
+            margin-bottom: 40px;
+        }
+        
+        .timing-card {
+            background: #f8fafc;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--gray-light);
+        }
+        
+        .timing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .time-display {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .edit-form {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--gray-light);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="navbar">
+                <div class="logo">
+                    <i class="fas fa-school"></i>
+                    <span>Allied School</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="timetable-container">
+            <div class="timetable-header">
+                <h1 class="timetable-title">Change Class Timings</h1>
+                <a href="dashboard.html" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            </div>
+            
+            <div class="timing-controls">
+                <button class="btn" id="show-monfri">Monday-Friday</button>
+                <button class="btn btn-outline" id="show-saturday">Saturday</button>
+            </div>
+            
+            <!-- Monday-Friday Timings -->
+            <div id="monfri-timings" class="timing-section">
+                <h2>Monday to Friday Timings</h2>
+                <div id="monfri-timing-list">
+                    <!-- Monday-Friday timing cards will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Saturday Timings -->
+            <div id="saturday-timings" class="timing-section" style="display: none;">
+                <h2>Saturday Timings</h2>
+                <div id="saturday-timing-list">
+                    <!-- Saturday timing cards will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Allied School Timetable System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let currentView = 'monfri';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTimings();
+            
+            // View toggle buttons
+            document.getElementById('show-monfri').addEventListener('click', function() {
+                showView('monfri');
+            });
+            
+            document.getElementById('show-saturday').addEventListener('click', function() {
+                showView('saturday');
+            });
+        });
+        
+        function showView(view) {
+            currentView = view;
+            
+            // Update button states
+            document.getElementById('show-monfri').className = view === 'monfri' ? 'btn' : 'btn btn-outline';
+            document.getElementById('show-saturday').className = view === 'saturday' ? 'btn' : 'btn btn-outline';
+            
+            // Show/hide sections
+            document.getElementById('monfri-timings').style.display = view === 'monfri' ? 'block' : 'none';
+            document.getElementById('saturday-timings').style.display = view === 'saturday' ? 'block' : 'none';
+            
+            loadTimings();
+        }
+        
+        function loadTimings() {
+            const dataKey = currentView === 'saturday' ? 'saturdayData' : 'monfriData';
+            const timingListId = currentView === 'saturday' ? 'saturday-timing-list' : 'monfri-timing-list';
+            
+            const classData = JSON.parse(localStorage.getItem(dataKey)) || [];
+            const timingList = document.getElementById(timingListId);
+            
+            if (classData.length === 0) {
+                timingList.innerHTML = '<p>No classes found.</p>';
+                return;
+            }
+            
+            let html = '';
+            classData.forEach(item => {
+                html += `
+                    <div class="timing-card" data-id="${item.id}">
+                        <div class="timing-header">
+                            <div>
+                                <h3>${item.class} - ${item.subject}</h3>
+                                <p>${item.teacher || 'No teacher assigned'}</p>
+                            </div>
+                            <div class="time-display">${item.startTime} - ${item.endTime}</div>
+                        </div>
+                        <button class="btn btn-outline" onclick="toggleEditForm(${item.id}, '${dataKey}')">
+                            <i class="fas fa-edit"></i> Change Timing
+                        </button>
+                        
+                        <div class="edit-form" id="edit-form-${item.id}">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Start Time</label>
+                                    <input type="time" id="edit-start-${item.id}" class="form-control" value="${item.startTime}">
+                                </div>
+                                <div class="form-group">
+                                    <label>End Time</label>
+                                    <input type="time" id="edit-end-${item.id}" class="form-control" value="${item.endTime}">
+                                </div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn" onclick="saveTiming(${item.id}, '${dataKey}')">Save Changes</button>
+                                <button class="btn btn-outline" onclick="toggleEditForm(${item.id}, '${dataKey}')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            timingList.innerHTML = html;
+        }
+        
+        function toggleEditForm(id, dataKey) {
+            const form = document.getElementById(`edit-form-${id}`);
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        function saveTiming(id, dataKey) {
+            const startTime = document.getElementById(`edit-start-${id}`).value;
+            const endTime = document.getElementById(`edit-end-${id}`).value;
+            
+            if (!startTime || !endTime) {
+                alert('Please fill in both start and end times.');
+                return;
+            }
+            
+            if (startTime >= endTime) {
+                alert('End time must be after start time.');
+                return;
+            }
+            
+            let classData = JSON.parse(localStorage.getItem(dataKey)) || [];
+            const index = classData.findIndex(item => item.id === id);
+            
+            if (index !== -1) {
+                classData[index].startTime = startTime;
+                classData[index].endTime = endTime;
+                
+                localStorage.setItem(dataKey, JSON.stringify(classData));
+                loadTimings();
+                
+                alert('Timing updated successfully!');
+            }
+        }
+    </script>
+</body>
+</html>
